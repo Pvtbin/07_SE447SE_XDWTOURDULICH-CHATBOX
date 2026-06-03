@@ -3,6 +3,7 @@ dotenv.config();
 
 import app from "./app.js";
 
+import authRoutes from "./routes/auth.routes.js";
 import tourRoutes from "./routes/tour.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
@@ -11,8 +12,8 @@ import reviewRoutes from "./routes/review.routes.js";
 
 import pool from "./config/db.js";
 
-import authRoutes from "./routes/auth.routes.js";
-
+// gắn route
+app.use("/api/tours", tourRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -27,8 +28,6 @@ console.log("DB_PASSWORD =", process.env.DB_PASSWORD);
 const [db] = await pool.query("SELECT DATABASE() as db");
 console.log(db);
 
-// gắn route
-app.use("/api/tours", tourRoutes);
 
 // test root
 app.get("/", async (req, res) => {
