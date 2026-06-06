@@ -1,7 +1,10 @@
+
 import dotenv from "dotenv";
+//load các biến môi trường
 dotenv.config();
 
 import app from "./app.js";
+import pool,{connectDB} from "./config/db.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import tourRoutes from "./routes/tour.routes.js";
@@ -10,7 +13,10 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 
 
-import pool from "./config/db.js";
+
+const PORT = process.env.PORT || 8080;
+
+
 
 // gắn route
 app.use("/api/tours", tourRoutes);
@@ -19,26 +25,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-const PORT = process.env.PORT || 8080;
-
-// test DB
-console.log("DB_USER =", process.env.DB_USER);
-console.log("DB_PASSWORD =", process.env.DB_PASSWORD);
-//kiểm tra kết nối DB
-const [db] = await pool.query("SELECT DATABASE() as db");
-console.log(db);
 
 
-// test root
-app.get("/", async (req, res) => {
-    try {
-        const [rows] = await pool.query("SELECT 1 AS test");
-        res.json(rows);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
+// khởi động server
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log("Server chạy trên cổng " + PORT);
+    });
 });
