@@ -5,7 +5,7 @@ import pool from "../config/db.js";
 // ==================== CHỨC NĂNG ĐĂNG KÝ ====================
 export const register = async (req, res) => {
     try {
-        const { ho_ten, email, mat_khau, vai_tro } = req.body;
+        const { ho_ten, email, mat_khau } = req.body;
 
         // 1. Kiểm tra xem người dùng có nhập thiếu trường nào không
         if (!ho_ten || !email || !mat_khau) {
@@ -35,7 +35,7 @@ export const register = async (req, res) => {
         // 4. Tiến hành lưu tài khoản mới vào DB
         await pool.query(
             `INSERT INTO users (ho_ten, email, mat_khau, vai_tro) VALUES (?, ?, ?, ?)`,
-            [ho_ten, email, hashedPassword, vai_tro] // Mặc định tài khoản mới 
+            [ho_ten, email, hashedPassword, "user"] // Mặc định tài khoản mới là user
         );
 
         // 5. Trả về phản hồi thành công
@@ -59,7 +59,7 @@ export const login = async (req, res) => {
     try {
         const { email, mat_khau } = req.body;
 
-        // 1. Kiểm tra đầu vào
+        // 🛠️ ĐIỂM CẦN SỬA 1: Điền lại logic kiểm tra nhập liệu đăng nhập
         if (!email || !mat_khau) {
             return res.status(400).json({
                 success: false,
@@ -67,13 +67,9 @@ export const login = async (req, res) => {
             });
         }
 
-        // 2. Tìm người dùng trong DB bằng email
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE email = ?",
-            [email]
-        );
-
-        // Nếu mảng rỗng nghĩa là không tìm thấy email này
+        // 🛠️ ĐIỂM CẦN SỬA 2: Tìm user trong database và so sánh mật khẩu thực tế
+        const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+        
         if (rows.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -81,11 +77,10 @@ export const login = async (req, res) => {
             });
         }
 
-        const user = rows[0];
+        const user = rows[0]; // Gán dữ liệu cơ sở dữ liệu vào biến user để dùng phía dưới
 
-        // 3. BẢO MẬT: So sánh mật khẩu thô vừa gõ với mật khẩu đã mã hóa trong DB
+        // So sánh mật khẩu mã hóa
         const isMatch = await bcrypt.compare(mat_khau, user.mat_khau);
-
         if (!isMatch) {
             return res.status(400).json({
                 success: false,
@@ -93,22 +88,28 @@ export const login = async (req, res) => {
             });
         }
 
-        // 4. QUẢN LÝ PHIÊN: Tạo token thông hành JWT (Hạn dùng 1 ngày)
-        const secretKey = process.env.JWT_SECRET;
+        // --- ĐOẠN ĐÚT COOKIE BẢO MẬT CỦA BẠN SẼ CHẠY SAU KHI ĐÃ CHECK USER THÀNH CÔNG ---
+        const secretKey = process.env.JWT_SECRET || "chuoi_bi_mat_du_phong_sieu_bao_mat_123";
+        
+        // 1. Tạo Token chứa id và vai_tro
         const token = jwt.sign(
-            {
-                id: user.id,
-                vai_tro: user.vai_tro // Lưu vai trò vào token để sau này phân quyền (admin/user)
-            },
+            { id: user.id, vai_tro: user.vai_tro },
             secretKey,
             { expiresIn: "1d" }
         );
 
-        // 5. Đăng nhập thành công, trả về token và thông tin cơ bản (giấu mật khẩu đi)
+        // 2. BẢO MẬT: Đút token vào HttpOnly Cookie gửi về trình duyệt
+        res.cookie("accessToken", token, {
+            httpOnly: true,     // 🔒 Chống mã độc XSS ăn cắp token
+            secure: false,      // Chạy localhost thì để false (khi deploy HTTPS thì để true)
+            sameSite: "strict", // Chống tấn công CSRF
+            maxAge: 24 * 60 * 60 * 1000 // Hết hạn sau 1 ngày
+        });
+
+        // 3. Trả về thông tin user thành công (Không chứa token lộ ra ngoài)
         return res.status(200).json({
             success: true,
-            message: "Đăng nhập thành công!",
-            token,
+            message: "Đăng nhập thành công bằng Cookie bảo mật!",
             user: {
                 id: user.id,
                 ho_ten: user.ho_ten,
@@ -118,11 +119,21 @@ export const login = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Lỗi Đăng nhập:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Đã xảy ra lỗi hệ thống khi đăng nhập!",
-            error: error.message
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
+};
+
+// ==================== CHỨC NĂNG ĐĂNG XUẤT ====================
+export const logout = async (req, res) => {
+    // Thêm các thuộc tính cấu hình giống y hệt lúc tạo để trình duyệt định vị và xóa sạch cookie
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: false, // Để false giống bên hàm login đang chạy localhost
+        sameSite: "strict"
+    });
+    
+    return res.status(200).json({
+        success: true,
+        message: "Đăng xuất thành công!"
+    });
 };
