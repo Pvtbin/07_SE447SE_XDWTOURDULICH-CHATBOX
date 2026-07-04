@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import pool from "../config/db.js"; // Import cấu hình pool MySQL của bạn
+import pool from "../config/db.js";
 
 // authorization - xác minh user là ai
 export const verifyToken = async (req, res, next) => {
     try {
-        // 1. LẤY TOKEN TỪ COOKIE (Thay vì lấy từ headers như bài mẫu)
+        // 1. LẤY TOKEN TỪ COOKIE
         const token = req.cookies?.accessToken;
 
         if (!token) {
@@ -20,8 +20,7 @@ export const verifyToken = async (req, res, next) => {
         // Giải mã token (hàm jwt.verify dạng đồng bộ hoặc bọc trong Promise)
         const decodedUser = jwt.verify(token, secretKey);
 
-        // 3. TÌM USER TRONG DATABASE MYSQL (Thay vì dùng User.findById của MongoDB)
-        // Lưu ý: Lúc login bạn giấu user.id vào token, nên giờ ta lấy decodedUser.id để truy vấn
+        // 3. TÌM USER TRONG DATABASE MYSQL
         const [rows] = await pool.query(
             "SELECT id, ho_ten, email, vai_tro FROM users WHERE id = ?", 
             [decodedUser.id]

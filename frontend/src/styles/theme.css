@@ -1,0 +1,181 @@
+/* ============================================================
+   HỘI AN TRAVEL — DESIGN SYSTEM v2
+   Ý tưởng: giấy đèn lồng ngả vàng, mái ngói âm dương, tường đất nung,
+   sông Hoài lúc chạng vạng. Không dùng theme xanh dương chung chung.
+   ============================================================ */
+:root {
+  /* ---- Bảng màu (đặt tên theo chất liệu thật của phố cổ) ---- */
+  --tile: #B94E2C;             /* ngói âm dương */
+  --tile-deep: #7E3418;        /* ngói trong bóng râm */
+  --wall: #E3A94D;             /* tường vàng đặc trưng */
+  --wall-soft: #F1D9A0;        /* tường vàng dưới nắng nhạt */
+  --lantern: #D64550;          /* đèn lồng đỏ */
+  --river: #1E6F65;            /* sông Hoài lúc chiều tà */
+  --river-deep: #123F39;       /* sông Hoài về đêm */
+  --ink: #241A12;              /* gỗ lim, chữ chính */
+  --ink-soft: #7A6A57;         /* chữ phụ */
+  --paper: #FBF1E1;            /* giấy đèn lồng / nền trang */
+  --paper-deep: #F2DFB8;       /* giấy đèn lồng đậm hơn, dùng cho input */
+  --white: #FFFFFF;
+
+  /* ---- Trạng thái ---- */
+  --success: #3C7A4B;
+  --success-bg: #E1EFDE;
+  --danger: #B23A2E;
+  --danger-bg: #F7DFD8;
+  --pending-bg: #FBE6C8;
+
+  /* ---- Bố cục ---- */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --shadow-card: 0 2px 8px rgba(36, 26, 18, 0.06), 0 12px 28px rgba(36, 26, 18, 0.07);
+  --shadow-lift: 0 8px 16px rgba(36, 26, 18, 0.1), 0 24px 48px rgba(36, 26, 18, 0.14);
+  --max-width: 1200px;
+
+  /* ---- Kiểu chữ ---- */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(rgba(185, 78, 44, 0.035) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+p { margin: 0; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; font-size: 15px; }
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--wall-soft); color: var(--tile-deep); }
+
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.15s ease, color 0.15s ease;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--tile); color: var(--white); box-shadow: 0 6px 16px rgba(185, 78, 44, 0.35); }
+.btn-primary:hover { background: var(--tile-deep); box-shadow: 0 8px 20px rgba(126, 52, 24, 0.4); }
+
+.btn-secondary { background: var(--river); color: var(--white); box-shadow: 0 6px 16px rgba(30, 111, 101, 0.3); }
+.btn-secondary:hover { background: var(--river-deep); }
+
+.btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid rgba(36, 26, 18, 0.25); }
+.btn-ghost:hover { border-color: var(--tile); color: var(--tile); background: rgba(185, 78, 44, 0.06); }
+
+.btn-danger { background: var(--danger); color: var(--white); }
+
+.btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* ============ Card ============ */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  border: 1px solid rgba(185, 78, 44, 0.07);
+}
+.card:hover { box-shadow: var(--shadow-lift); transform: translateY(-3px); }
+
+.tour-card { position: relative; display: block; }
+.tour-card .tour-card__media { height: 190px; position: relative; overflow: hidden; }
+.tour-card .tour-card__media img,
+.tour-card .tour-card__media .fallback { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.tour-card:hover .tour-card__media img,
+.tour-card:hover .tour-card__media .fallback { transform: scale(1.08); }
+.tour-card .tour-card__badge {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(36, 26, 18, 0.55); color: var(--white); backdrop-filter: blur(4px);
+  padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+
+/* ============ Form field ============ */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.field label {
+  font-size: 12.5px; font-weight: 700; color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.field input, .field textarea, .field select {
+  padding: 13px 16px; border: 1.5px solid var(--wall-soft); border-radius: var(--radius-sm);
+  background: var(--paper-deep); color: var(--ink); outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--tile); background: var(--white);
+}
+
+/* ============ Badge ============ */
+.badge {
+  display: inline-block; padding: 5px 13px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.badge-pending { background: var(--pending-bg); color: var(--tile-deep); }
+.badge-confirmed { background: var(--success-bg); color: var(--success); }
+.badge-cancelled { background: var(--danger-bg); color: var(--danger); }
+
+/* ============ Nav ============ */
+.navbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251, 241, 225, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(185, 78, 44, 0.12);
+}
+.navbar__link { font-weight: 600; font-size: 15px; color: var(--ink); position: relative; padding-bottom: 4px; }
+.navbar__link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+  background: var(--tile); transform: scaleX(0); transform-origin: left; transition: transform 0.2s ease;
+}
+.navbar__link:hover::after { transform: scaleX(1); }
+
+/* ============ Eyebrow ============ */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--tile-deep);
+}
+.eyebrow::before { content: ''; width: 22px; height: 1.5px; background: var(--tile); }
+
+/* ============ Utility ============ */
+.text-muted { color: var(--ink-soft); }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.grid-tours { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; }
+
+table { font-family: var(--font-body); }
+th { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+}
