@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { getToursApi, createTourApi, updateTourApi, deleteTourApi } from "../../api/tours";
+import TourImageManager from "../../components/tourImageManager";
 
 const EMPTY_FORM = {
   tieu_de: "", mo_ta: "", gia: "", dia_diem: "",
@@ -118,6 +119,8 @@ export default function ManageTours() {
           )}
         </div>
       </form>
+
+      {editingId && <TourImageManager tourId={editingId} />}
 
       <div className="card" style={{ overflow: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>

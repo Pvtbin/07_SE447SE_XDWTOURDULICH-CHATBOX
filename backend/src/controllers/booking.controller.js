@@ -35,11 +35,14 @@ export const createBooking = async (req, res) => {
 
         const tong_tien = tour.gia * so_nguoi_dat;
 
+        // --- ĐOẠN ĐÃ THAY ĐỔI THEO YÊU CẦU ---
         await connection.query(
             `INSERT INTO bookings (user_id, tour_id, so_nguoi_dat, tong_tien)
              VALUES (?, ?, ?, ?)`,
             [req.user.id, tour_id, so_nguoi_dat, tong_tien]
         );
+
+        const [[{ bookingId }]] = await connection.query("SELECT LAST_INSERT_ID() AS bookingId");
 
         await connection.query(
             "UPDATE tours SET so_cho_con_lai = so_cho_con_lai - ? WHERE id = ?",
@@ -49,7 +52,8 @@ export const createBooking = async (req, res) => {
         await connection.commit();
         connection.release();
 
-        res.json({ message: "Đặt tour thành công", tong_tien });
+        res.json({ message: "Đặt tour thành công", bookingId, tong_tien, tour_id });
+        // -------------------------------------
 
     } catch (error) {
         await connection.rollback();
@@ -133,4 +137,4 @@ export const updateBookingStatus = async (req, res) => {
         connection.release();
         res.status(500).json({ message: error.message });
     }
-};
+}

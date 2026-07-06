@@ -1,5 +1,14 @@
 import axios from "axios";
 
+export const BACKEND_ORIGIN = "http://localhost:8080";
+
+// Ảnh tour lưu dạng đường dẫn tương đối ("/uploads/tours/...") -> cần ghép domain backend
+// Ảnh ngoài (vd link VietQR) đã là URL đầy đủ -> giữ nguyên
+export const resolveImageUrl = (url) => {
+  if (!url) return null;
+  return url.startsWith("http") ? url : `${BACKEND_ORIGIN}${url}`;
+};
+
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080/api",
   withCredentials: true, // bắt buộc để gửi cookie httpOnly accessToken

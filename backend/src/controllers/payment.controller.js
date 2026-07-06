@@ -30,7 +30,7 @@ export const createPayment = async (req, res) => {
         res.status(201).json({
             message: "Tạo yêu cầu thanh toán thành công",
             paymentId: result.insertId,
-            qrUrl
+            qrUrl,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

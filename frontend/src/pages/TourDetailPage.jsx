@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTourByIdApi } from "../api/tours";
-import { createBookingApi, createPaymentApi, createReviewApi, getReviewsByTourApi } from "../api/bookings";
+import { resolveImageUrl } from "../api/axiosClient";
+import { createBookingApi, getReviewsByTourApi } from "../api/bookings";
 import { useAuth } from "../context/AuthContext";
 
 export default function TourDetailPage() {
@@ -12,11 +13,8 @@ export default function TourDetailPage() {
   const [tour, setTour] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [soNguoi, setSoNguoi] = useState(1);
-  const [booking, setBooking] = useState(null); // { id, tong_tien }
-  const [payMethod, setPayMethod] = useState("tien_mat");
-  const [qrUrl, setQrUrl] = useState(null);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,14 +45,21 @@ export default function TourDetailPage() {
   const handleBooking = async () => {
     if (!user) return navigate("/dang-nhap");
     setError("");
-    setMessage("");
+    setSubmitting(true);
     try {
       const res = await createBookingApi({ tour_id: id, so_nguoi_dat: soNguoi });
-      // booking.controller trả về { message, tong_tien } chứ không trả id -> tạm lưu số tiền
-      setBooking({ tong_tien: res.data.tong_tien });
-      setMessage("Đặt tour thành công! Vui lòng chọn phương thức thanh toán bên dưới.");
+      // backend trả { bookingId, tong_tien, tour_id } sau khi thêm LAST_INSERT_ID()
+      navigate(`/thanh-toan/${res.data.bookingId}`, {
+        state: {
+          tongTien: res.data.tong_tien,
+          tenTour: tour.tieu_de,
+          soNguoiDat: soNguoi,
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || "Đặt tour thất bại");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -68,7 +73,7 @@ export default function TourDetailPage() {
           height: 360,
           borderRadius: "var(--radius-lg)",
           background: tour.images?.[0]
-            ? `url(${tour.images[0].image_url}) center/cover`
+            ? `url(${resolveImageUrl(tour.images[0].image_url)}) center/cover`
             : "linear-gradient(135deg, var(--tile), var(--wall))",
           marginBottom: 32,
         }}
@@ -115,83 +120,33 @@ export default function TourDetailPage() {
           </div>
 
           {error && <p style={{ color: "var(--danger)", fontSize: 14, marginBottom: 12 }}>{error}</p>}
-          {message && <p style={{ color: "var(--success)", fontSize: 14, marginBottom: 12 }}>{message}</p>}
 
-          {!booking ? (
-            <>
-              <div className="field">
-                <label>Số người</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={tour.so_cho_con_lai}
-                  value={soNguoi}
-                  onChange={(e) => setSoNguoi(Number(e.target.value))}
-                />
-              </div>
-              <button className="btn btn-primary" style={{ width: "100%" }} onClick={handleBooking}>
-                Đặt tour ngay
-              </button>
-            </>
-          ) : (
-            <PaymentBox
-              tongTien={booking.tong_tien}
-              payMethod={payMethod}
-              setPayMethod={setPayMethod}
-              qrUrl={qrUrl}
-              setQrUrl={setQrUrl}
-              tourId={id}
+          <div className="field">
+            <label>Số người</label>
+            <input
+              type="number"
+              min={1}
+              max={tour.so_cho_con_lai}
+              value={soNguoi}
+              onChange={(e) => setSoNguoi(Number(e.target.value))}
             />
-          )}
+          </div>
+
+          <div className="flex-between" style={{ marginBottom: 16, fontSize: 14 }}>
+            <span className="text-muted">Tạm tính</span>
+            <strong>{Number(tour.gia * soNguoi).toLocaleString("vi-VN")} đ</strong>
+          </div>
+
+          <button
+            className="btn btn-primary"
+            style={{ width: "100%" }}
+            onClick={handleBooking}
+            disabled={submitting || tour.so_cho_con_lai < 1}
+          >
+            {tour.so_cho_con_lai < 1 ? "Đã hết chỗ" : submitting ? "Đang xử lý..." : "Đặt tour ngay"}
+          </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PaymentBox({ tongTien, payMethod, setPayMethod, qrUrl, setQrUrl, tourId }) {
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState("");
-
-  const handlePay = async () => {
-    setError("");
-    try {
-      // Lưu ý: cần booking_id thật từ API tạo booking trả về để dùng ở đây.
-      // Hiện booking.controller chỉ trả tong_tien — nếu cần liên kết payment,
-      // hãy sửa createBooking backend để res.json thêm bookingId: result.insertId
-      setDone(true);
-    } catch (err) {
-      setError(err.response?.data?.message || "Thanh toán thất bại");
-    }
-  };
-
-  if (done) {
-    return (
-      <div style={{ textAlign: "center", padding: "20px 0" }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-        <p style={{ fontWeight: 600 }}>Đã ghi nhận yêu cầu thanh toán!</p>
-        <p className="text-muted" style={{ fontSize: 14 }}>Xem trạng thái tại "Tour của tôi"</p>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <p style={{ marginBottom: 12 }}>Tổng tiền: <strong>{Number(tongTien).toLocaleString("vi-VN")} đ</strong></p>
-      <div className="field">
-        <label>Phương thức thanh toán</label>
-        <select value={payMethod} onChange={(e) => setPayMethod(e.target.value)}>
-          <option value="tien_mat">Tiền mặt</option>
-          <option value="chuyen_khoan">Chuyển khoản (QR)</option>
-          <option value="momo">MoMo</option>
-          <option value="vnpay">VNPay</option>
-        </select>
-      </div>
-      {qrUrl && <img src={qrUrl} alt="QR thanh toán" style={{ width: "100%", borderRadius: 8, marginBottom: 12 }} />}
-      {error && <p style={{ color: "var(--danger)", fontSize: 14 }}>{error}</p>}
-      <button className="btn btn-secondary" style={{ width: "100%" }} onClick={handlePay}>
-        Xác nhận thanh toán
-      </button>
     </div>
   );
 }

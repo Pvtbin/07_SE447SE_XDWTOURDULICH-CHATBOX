@@ -4,6 +4,7 @@ const links = [
   { to: "/admin", label: "Tổng quan", end: true },
   { to: "/admin/tours", label: "Quản lý Tour" },
   { to: "/admin/bookings", label: "Đơn đặt tour" },
+  { to: "/admin/payments", label: "Thanh toán" },
 ];
 
 export default function AdminLayout({ children }) {

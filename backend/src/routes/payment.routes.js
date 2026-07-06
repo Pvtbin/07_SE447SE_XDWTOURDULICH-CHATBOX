@@ -4,7 +4,7 @@ import { isAdmin } from "../middleware/role.middleware.js";
 import {
     createPayment,
     verifyPayment,
-    getAllPayments
+    getAllPayments,
 } from "../controllers/payment.controller.js";
 
 const router = express.Router();

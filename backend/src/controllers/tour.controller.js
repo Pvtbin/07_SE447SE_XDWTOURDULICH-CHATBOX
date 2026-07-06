@@ -2,6 +2,10 @@
 import pool from "../config/db.js";
 import { getFeaturedToursFromDB } from "../services/tour.service.js";
 
+//
+import fs from "fs";
+import path from "path";
+
 // GET /tours  -> danh sách tour (kèm ảnh đại diện nếu có trong tour_images)
 export const getFeaturedTours = async (req, res) => {
   try {
@@ -98,4 +102,102 @@ export const deleteTour = async (req, res) => {
     // Lỗi phổ biến: tour đang có booking liên kết (FOREIGN KEY constraint)
     res.status(500).json({ message: "Không thể xoá tour này (có thể đang có booking liên kết)" });
   }
+};
+// ====== THÊM 2 HÀM NÀY VÀO CUỐI FILE src/controllers/tour.controller.js HIỆN CÓ ======
+// Nhớ thêm 2 dòng import ở đầu file:
+//   import fs from "fs";
+//   import path from "path";
+
+// POST /tours/:id/images (admin) -> upload 1 ảnh cho tour
+export const uploadTourImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!req.file) {
+            return res.status(400).json({ message: "Chưa chọn file ảnh" });
+        }
+
+        const imageUrl = `/uploads/tours/${req.file.filename}`;
+
+        // Nếu tour chưa có ảnh nào -> ảnh đầu tiên tự động làm thumbnail
+        const [existing] = await pool.query(
+            "SELECT id FROM tour_images WHERE tour_id = ?",
+            [id]
+        );
+        const isThumbnail = existing.length === 0;
+
+        const [result] = await pool.query(
+            "INSERT INTO tour_images (tour_id, image_url, is_thumbnail) VALUES (?, ?, ?)",
+            [id, imageUrl, isThumbnail]
+        );
+
+        res.status(201).json({
+            message: "Tải ảnh lên thành công",
+            id: result.insertId,
+            image_url: imageUrl,
+            is_thumbnail: isThumbnail,
+        });
+    } catch (error) {
+        console.error("Lỗi uploadTourImage:", error);
+        res.status(500).json({ message: "Lỗi máy chủ khi tải ảnh lên" });
+    }
+};
+
+// PUT /tours/images/:imageId/thumbnail (admin) -> đặt ảnh này làm đại diện, bỏ đại diện các ảnh khác cùng tour
+export const setThumbnailImage = async (req, res) => {
+    try {
+        const { imageId } = req.params;
+
+        const [rows] = await pool.query("SELECT tour_id FROM tour_images WHERE id = ?", [imageId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy ảnh" });
+        }
+        const { tour_id } = rows[0];
+
+        // Bỏ is_thumbnail của toàn bộ ảnh khác thuộc tour này, rồi bật cho ảnh được chọn
+        await pool.query("UPDATE tour_images SET is_thumbnail = 0 WHERE tour_id = ?", [tour_id]);
+        await pool.query("UPDATE tour_images SET is_thumbnail = 1 WHERE id = ?", [imageId]);
+
+        res.json({ message: "Đã đặt làm ảnh đại diện" });
+    } catch (error) {
+        console.error("Lỗi setThumbnailImage:", error);
+        res.status(500).json({ message: "Lỗi máy chủ khi đặt ảnh đại diện" });
+    }
+};
+
+// DELETE /tours/images/:imageId (admin) -> xoá 1 ảnh
+export const deleteTourImage = async (req, res) => {
+    try {
+        const { imageId } = req.params;
+
+        const [rows] = await pool.query("SELECT * FROM tour_images WHERE id = ?", [imageId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy ảnh" });
+        }
+
+        // Xoá file vật lý trên ổ đĩa, bỏ qua nếu không tồn tại
+        const filePath = path.join(process.cwd(), "public", rows[0].image_url);
+        fs.unlink(filePath, () => {});
+
+        const wasThumbnail = rows[0].is_thumbnail === 1;
+        const { tour_id } = rows[0];
+
+        await pool.query("DELETE FROM tour_images WHERE id = ?", [imageId]);
+
+        // Nếu vừa xoá ảnh đại diện -> tự động gán ảnh còn lại đầu tiên (nếu có) làm đại diện mới
+        if (wasThumbnail) {
+            const [remaining] = await pool.query(
+                "SELECT id FROM tour_images WHERE tour_id = ? ORDER BY ngay_tao ASC LIMIT 1",
+                [tour_id]
+            );
+            if (remaining.length > 0) {
+                await pool.query("UPDATE tour_images SET is_thumbnail = 1 WHERE id = ?", [remaining[0].id]);
+            }
+        }
+
+        res.json({ message: "Xoá ảnh thành công" });
+    } catch (error) {
+        console.error("Lỗi deleteTourImage:", error);
+        res.status(500).json({ message: "Lỗi máy chủ khi xoá ảnh" });
+    }
 };
