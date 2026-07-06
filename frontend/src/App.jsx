@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
-import ChatWidget from "./components/ChatWidget";
+import ChatWidget from "./components/chatWidget";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageTours from "./pages/admin/ManageTours";
 import ManageBookings from "./pages/admin/ManageBookings";
 import ManagePayments from "./pages/admin/ManagePayments";
+import ManageRefunds from "./pages/admin/ManageRefunds";
 
 export default function App() {
   return (
@@ -73,6 +74,14 @@ export default function App() {
             element={
               <ProtectedRoute requireRole="admin">
                 <ManagePayments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/refunds"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <ManageRefunds />
               </ProtectedRoute>
             }
           />
