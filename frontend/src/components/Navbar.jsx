@@ -25,12 +25,19 @@ export default function Navbar() {
               alignItems: "center",
               justifyContent: "center",
               boxShadow: "var(--shadow-neon)",
+              overflow: "hidden" 
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
+            {}
+            <img 
+              src="/logo2.png" 
+              alt="VNTravel Logo" 
+              style={{ 
+                width: "100%", 
+                height: "100%", 
+                objectFit: "cover" 
+              }} 
+            />
           </div>
           <span style={{
             fontFamily: "var(--font-display)",
@@ -41,7 +48,7 @@ export default function Navbar() {
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
           }}>
-            Hội An Travel
+            VNTravel
           </span>
         </Link>
 
