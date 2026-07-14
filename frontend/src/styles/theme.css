@@ -273,6 +273,10 @@ img {
   background: rgba(0, 212, 255, 0.05);
 }
 
+.user-link:hover {
+  background: rgba(0, 212, 255, 0.1);
+}
+
 .btn-danger {
   background: var(--danger);
   color: var(--white);

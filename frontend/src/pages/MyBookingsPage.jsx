@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getMyBookingsApi, cancelBookingApi } from "../api/bookings";
+import { resolveImageUrl } from "../api/axiosClient";
 
 const STATUS_CONFIG = {
   cho_xac_nhan: { text: "Chờ xác nhận", cls: "badge-pending", canCancel: true },
@@ -9,6 +11,7 @@ const STATUS_CONFIG = {
 };
 
 export default function MyBookingsPage() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null);
@@ -101,7 +104,7 @@ export default function MyBookingsPage() {
                   background: "var(--ocean-mist)",
                 }}>
                   {b.thumbnail ? (
-                    <img src={`http://localhost:8080${b.thumbnail}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={resolveImageUrl(b.thumbnail)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
                     <div style={{
                       width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center",
@@ -155,16 +158,31 @@ export default function MyBookingsPage() {
                       {Number(b.tong_tien).toLocaleString("vi-VN")} đ
                     </div>
                   </div>
-                  {status.canCancel && (
+                  <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
                     <button
-                      className="btn btn-ghost"
-                      style={{ padding: "8px 16px", fontSize: 13, marginTop: 12 }}
-                      onClick={() => handleCancelClick(b)}
-                      disabled={cancelling === b.id}
+                      className="btn btn-primary"
+                      style={{ padding: "8px 16px", fontSize: 13 }}
+                      onClick={() => navigate(`/hoa-don/${b.id}`)}
                     >
-                      {cancelling === b.id ? "Đang hủy..." : "Hủy tour"}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
+                      Hóa đơn
                     </button>
-                  )}
+                    {status.canCancel && (
+                      <button
+                        className="btn btn-ghost"
+                        style={{ padding: "8px 16px", fontSize: 13 }}
+                        onClick={() => handleCancelClick(b)}
+                        disabled={cancelling === b.id}
+                      >
+                        {cancelling === b.id ? "Đang hủy..." : "Hủy tour"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 

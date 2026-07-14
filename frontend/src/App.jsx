@@ -10,6 +10,8 @@ import RegisterPage from "./pages/RegisterPage";
 import TourDetailPage from "./pages/TourDetailPage";
 import PaymentPage from "./pages/PaymentPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
+import TourInvoicePage from "./pages/TourInvoicePage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageTours from "./pages/admin/ManageTours";
 import ManageBookings from "./pages/admin/ManageBookings";
@@ -41,6 +43,24 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/hoa-don/:id"
+            element={
+              <ProtectedRoute>
+                <TourInvoicePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/tai-khoan"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />
@@ -82,6 +102,14 @@ export default function App() {
             element={
               <ProtectedRoute requireRole="admin">
                 <ManageRefunds />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/hoa-don/:id"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <TourInvoicePage />
               </ProtectedRoute>
             }
           />

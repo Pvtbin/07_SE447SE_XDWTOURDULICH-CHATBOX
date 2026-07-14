@@ -3,6 +3,8 @@ import axiosClient from "./axiosClient";
 // Bookings
 export const createBookingApi = (data) => axiosClient.post("/bookings", data);
 export const getMyBookingsApi = () => axiosClient.get("/bookings/my");
+export const getBookingByIdApi = (id) => axiosClient.get(`/bookings/${id}`);
+export const sendInvoiceApi = (id) => axiosClient.post(`/bookings/${id}/send-invoice`);
 export const getAllBookingsApi = () => axiosClient.get("/bookings");
 export const updateBookingStatusApi = (id, trang_thai) =>
   axiosClient.put(`/bookings/${id}/status`, { trang_thai });

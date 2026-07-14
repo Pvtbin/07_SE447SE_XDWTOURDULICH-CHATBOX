@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { sendInvoiceEmail } from "../services/email.service.js";
 
 // POST /bookings -> đặt tour
 export const createBooking = async (req, res) => {
@@ -68,6 +69,69 @@ export const myBookings = async (req, res) => {
             [req.user.id]
         );
         res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET /bookings/:id -> chi tiết booking (admin xem mọi đơn, user chỉ xem đơn của mình)
+export const getBookingById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const isAdmin = req.user.vai_tro === "admin";
+
+        const query = isAdmin
+            ? `SELECT b.*, t.tieu_de, t.dia_diem, t.gia, t.mo_ta, t.lich_trinh, t.ngay_bat_dau, t.ngay_ket_thuc, t.so_nguoi_toi_da
+               FROM bookings b JOIN tours t ON b.tour_id = t.id WHERE b.id = ?`
+            : `SELECT b.*, t.tieu_de, t.dia_diem, t.gia, t.mo_ta, t.lich_trinh, t.ngay_bat_dau, t.ngay_ket_thuc, t.so_nguoi_toi_da
+               FROM bookings b JOIN tours t ON b.tour_id = t.id WHERE b.id = ? AND b.user_id = ?`;
+        const params = isAdmin ? [id] : [id, req.user.id];
+
+        const [bookings] = await pool.query(query, params);
+
+        if (bookings.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy đơn đặt tour" });
+        }
+
+        const booking = bookings[0];
+
+        const [images] = await pool.query(
+            "SELECT id, image_url, is_thumbnail FROM tour_images WHERE tour_id = ?",
+            [booking.tour_id]
+        );
+
+        const [users] = await pool.query(
+            "SELECT id, ho_ten, email, so_dien_thoai FROM users WHERE id = ?",
+            [booking.user_id]
+        );
+
+        booking.tour_images = images;
+        booking.user_info = users[0] || null;
+
+        res.json(booking);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// POST /bookings/:id/send-invoice -> Gửi hóa đơn qua email
+export const sendInvoice = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [bookings] = await pool.query("SELECT * FROM bookings WHERE id = ?", [id]);
+
+        if (bookings.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy đơn đặt tour" });
+        }
+
+        const result = await sendInvoiceEmail(id);
+
+        if (result.success) {
+            res.json({ message: "Hóa đơn đã được gửi đến email khách hàng" });
+        } else {
+            res.status(500).json({ message: result.message });
+        }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

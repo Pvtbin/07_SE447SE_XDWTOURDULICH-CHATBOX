@@ -145,7 +145,7 @@ export default function HomePage() {
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
               <span style={{ fontSize: 13, fontWeight: 600, color: "var(--neon-cyan)" }}>
-                Di sản văn hóa thế giới UNESCO
+                Chạm vào dòng chảy di sản
               </span>
             </div>
 
@@ -162,7 +162,7 @@ export default function HomePage() {
                 backgroundClip: "text",
               }}
             >
-              Khám phá Hội An
+              Khám phá Việt Nam
               <br />
               <span style={{
                 background: "var(--gradient-neon)",
@@ -184,8 +184,8 @@ export default function HomePage() {
                 margin: "0 auto 40px",
               }}
             >
-              Từ phố cổ vàng rực rỡ đến biển An Bàng xanh ngát —
-              chọn tour, đặt chỗ và thanh toán chỉ trong vài chạm.
+              Từ những đỉnh núi mờ sương đến những bờ cát trắng trải dài
+              chọn tour, đặt chỗ và sẵn sàng lên đường chỉ trong vài chạm.
             </p>
 
             {/* Search Box */}
@@ -295,7 +295,7 @@ export default function HomePage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" strokeWidth="2">
               <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
             </svg>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ocean-mid)" }}>Curated Collection</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ocean-mid)" }}>Bộ sưu tập tuyển chọn</span>
           </div>
           <h2 style={{ fontSize: "clamp(2rem, 4vw, 2.5rem)", marginBottom: 12 }}>
             Tour <span className="text-gradient">nổi bật</span> tuần này
@@ -590,7 +590,7 @@ export default function HomePage() {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer
+     <footer
         style={{
           background: "var(--ink)",
           padding: "60px 0 30px",
@@ -607,25 +607,27 @@ export default function HomePage() {
           >
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <div
+                
+                <img 
+                  src="/logo2.png" 
+                  alt="VNTravel Logo" 
                   style={{
                     width: 40,
                     height: 40,
+                    objectFit: "contain",
                     borderRadius: "var(--radius-md)",
-                    background: "var(--gradient-neon)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                   }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>
-                  </svg>
-                </div>
-                <span style={{ fontSize: 20, fontWeight: 700, color: "var(--white)" }}>Hội An Travel</span>
+                />
+
+                
+                <span style={{ fontSize: 20, fontWeight: 700, color: "var(--white)" }}>
+                  VNTravel
+                </span>
               </div>
+
+              
               <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.7, maxWidth: 280 }}>
-                Khám phá vẻ đẹp phố cổ Hội An qua những tour du lịch được chọn lọc kỹ càng.
+                Khám phá vẻ đẹp Việt Nam qua những hành trình di sản và tour du lịch được tinh tuyển kỹ càng.
               </p>
             </div>
 
@@ -665,7 +667,7 @@ export default function HomePage() {
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                     <polyline points="22,6 12,13 2,6"/>
                   </svg>
-                  support@hoiantravel.vn
+                  support@VNtravel.vn
                 </div>
               </div>
             </div>
@@ -683,7 +685,7 @@ export default function HomePage() {
             }}
           >
             <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
-              © 2026 Hội An Travel — Đồ án CDIO4. All rights reserved.
+              © 2026 VNTravel — Đồ án CDIO4. All rights reserved.
             </span>
             <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
               Made with React · Node.js · MySQL

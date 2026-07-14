@@ -181,9 +181,28 @@ export default function RegisterPage() {
           </div>
 
           <div className="field">
-            <label>Mật khẩu</label>
+            <label>Số điện thoại</label>
             <div style={{ position: "relative" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="2"
+                style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input
+                type="text"
+                required
+                value={form.so_dien_thoai}
+                onChange={(e) => setForm({ ...form, so_dien_thoai: e.target.value })}
+                style={{ paddingLeft: 44 }}
+                placeholder="09xxxxxxxx"
+              />
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Mật khẩu</label>
+            <div style={{ position: "relative" }}>
+              <svg width="18" height="18" viewBox="0 0 30 30" fill="none" stroke="var(--slate)" strokeWidth="2"
                 style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}>
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -200,6 +219,8 @@ export default function RegisterPage() {
               />
             </div>
           </div>
+
+          
 
           <button
             type="submit"

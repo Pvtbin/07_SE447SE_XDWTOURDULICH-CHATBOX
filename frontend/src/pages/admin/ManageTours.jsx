@@ -31,6 +31,8 @@ export default function ManageTours() {
 
   // Itinerary editor state
   const [itinerary, setItinerary] = useState([]);
+  // Selected files preview
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => { fetchTours(); }, []);
 
@@ -55,6 +57,8 @@ export default function ManageTours() {
     setTourImages([]);
     setShowForm(false);
     setItinerary([]);
+    setSelectedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleImageUpload = async (tourId, files) => {
@@ -70,6 +74,8 @@ export default function ManageTours() {
       if (updatedTour && updatedTour.images) {
         setTourImages(updatedTour.images);
       }
+      setSelectedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       alert(err.response?.data?.message || "Tải ảnh lên thất bại");
     } finally {
@@ -87,13 +93,17 @@ export default function ManageTours() {
 
       if (editingId) {
         await updateTourApi(editingId, { ...form, lich_trinh: itineraryData });
+        // Upload new images if any
+        if (selectedFiles.length > 0) {
+          await handleImageUpload(editingId, selectedFiles);
+        }
       } else {
         const res = await createTourApi({ ...form, lich_trinh: itineraryData });
         const newTourId = res.data.id;
 
         // If creating new tour and user selected images, upload them
-        if (fileInputRef.current?.files?.length > 0) {
-          await handleImageUpload(newTourId, fileInputRef.current.files);
+        if (selectedFiles.length > 0) {
+          await handleImageUpload(newTourId, selectedFiles);
         }
       }
       resetForm();
@@ -249,7 +259,7 @@ export default function ManageTours() {
                   type="button"
                   onClick={() => {
                     const newDay = itinerary.length + 1;
-                    setItinerary([...itinerary, { day: newDay, title: `Ngày ${newDay}`, activities: [] }]);
+                    setItinerary([...itinerary, { day: newDay, title: `Day ${newDay}`, activities: [] }]);
                   }}
                   style={{
                     padding: "6px 14px",
@@ -501,8 +511,9 @@ export default function ManageTours() {
                   accept="image/*"
                   multiple
                   onChange={(e) => {
-                    if (!editingId && e.target.files?.length > 0) {
-                      // Store files for later upload after tour is created
+                    const files = Array.from(e.target.files || []);
+                    if (files.length > 0) {
+                      setSelectedFiles(files);
                     }
                   }}
                   style={{ display: "none" }}
@@ -522,6 +533,80 @@ export default function ManageTours() {
                   </>
                 )}
               </div>
+
+              {/* Selected files preview */}
+              {selectedFiles.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--slate)" }}>
+                      Ảnh đã chọn ({selectedFiles.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFiles([]);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      style={{
+                        padding: "4px 12px",
+                        background: "var(--danger-bg)",
+                        border: "none",
+                        borderRadius: "var(--radius-sm)",
+                        color: "var(--danger)",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    >
+                      Xóa tất cả
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} style={{
+                        position: "relative",
+                        width: 100,
+                        height: 80,
+                        borderRadius: "var(--radius-sm)",
+                        overflow: "hidden",
+                        border: "1px solid var(--cloud)",
+                      }}>
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${index + 1}`}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newFiles = selectedFiles.filter((_, i) => i !== index);
+                            setSelectedFiles(newFiles);
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            width: 20,
+                            height: 20,
+                            borderRadius: "50%",
+                            border: "none",
+                            background: "var(--danger)",
+                            color: "white",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 12,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Show existing images for editing */}

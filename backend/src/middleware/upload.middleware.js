@@ -10,7 +10,9 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        cb(null, `tour_${req.params.id}_${Date.now()}${ext}`);
+        // Chỉ dùng timestamp và số ngẫu nhiên để tránh trùng lặp trước
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, `temp_${uniqueSuffix}${ext}`);
     },
 });
 

@@ -67,25 +67,39 @@ export default function Navbar() {
 
           {user ? (
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <div
+              <Link
+                to="/tai-khoan"
                 style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  background: "var(--gradient-neon)",
                   display: "flex",
+                  gap: 10,
                   alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: 14,
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  borderRadius: "var(--radius-full)",
+                  transition: "background 0.2s",
                 }}
+                className="user-link"
               >
-                {user.ho_ten?.charAt(0).toUpperCase()}
-              </div>
-              <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-light)" }}>
-                {user.ho_ten}
-              </span>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: "var(--gradient-neon)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: 14,
+                  }}
+                >
+                  {user.ho_ten?.charAt(0).toUpperCase()}
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-light)" }}>
+                  {user.ho_ten}
+                </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 style={{

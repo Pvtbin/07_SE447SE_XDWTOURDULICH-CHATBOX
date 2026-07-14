@@ -85,7 +85,7 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
     try {
         const [rows] = await pool.query(
-            "SELECT id, ho_ten, email, vai_tro FROM users WHERE id = ?",
+            "SELECT id, ho_ten, email, so_dien_thoai, vai_tro, ngay_tao FROM users WHERE id = ?",
             [req.user.id]
         );
 
@@ -96,6 +96,61 @@ export const getMe = async (req, res) => {
         return res.status(200).json({ success: true, user: rows[0] });
 
     } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ==================== CẬP NHẬT THÔNG TIN CÁ NHÂN ====================
+export const updateProfile = async (req, res) => {
+    try {
+        const { ho_ten, so_dien_thoai, mat_khau_cu, mat_khau_moi } = req.body;
+        const userId = req.user.id;
+
+        // Nếu đổi mật khẩu, cần xác thực mật khẩu cũ
+        if (mat_khau_moi) {
+            if (!mat_khau_cu) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Vui lòng nhập mật khẩu cũ để đổi mật khẩu"
+                });
+            }
+
+            const [users] = await pool.query("SELECT mat_khau FROM users WHERE id = ?", [userId]);
+            if (users.length === 0) {
+                return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });
+            }
+
+            const isMatch = await bcrypt.compare(mat_khau_cu, users[0].mat_khau);
+            if (!isMatch) {
+                return res.status(400).json({ success: false, message: "Mật khẩu cũ không đúng" });
+            }
+
+            const hashedPassword = await bcrypt.hash(mat_khau_moi, 10);
+            await pool.query(
+                "UPDATE users SET ho_ten = ?, so_dien_thoai = ?, mat_khau = ? WHERE id = ?",
+                [ho_ten, so_dien_thoai || null, hashedPassword, userId]
+            );
+        } else {
+            await pool.query(
+                "UPDATE users SET ho_ten = ?, so_dien_thoai = ? WHERE id = ?",
+                [ho_ten, so_dien_thoai || null, userId]
+            );
+        }
+
+        // Trả về thông tin đã cập nhật
+        const [updated] = await pool.query(
+            "SELECT id, ho_ten, email, so_dien_thoai, vai_tro, ngay_tao FROM users WHERE id = ?",
+            [userId]
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật thông tin thành công",
+            user: updated[0]
+        });
+
+    } catch (error) {
+        console.error("Lỗi cập nhật profile:", error);
         return res.status(500).json({ success: false, message: error.message });
     }
 };
